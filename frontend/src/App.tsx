@@ -4,6 +4,8 @@ import { Contract, ethers } from 'ethers'
 import BattleshipContract from '../../backend/artifacts/contracts/Battleship.sol/Battleship.json'
 import getContract from './utils/useGetContract'
 
+import Grid from './components/Grid'
+
 function App() {
   const [contract, setContract] = useState() as any
   const [name, setName] = useState('')
@@ -24,17 +26,16 @@ function App() {
   //   setContract(getContract(contractAddress));
   // }, [])
 
-  useEffect(()  => {
+  useEffect(() => {
     if (contract) {
       contract.on('PlayerJoinded', async function () {
-        const players = await contract.getPlayers();
-        setConnectedPlayers(players);
+        const players = await contract.getPlayers()
+        setConnectedPlayers(players)
         console.log(players)
 
-        if(players.length == 2){
+        if (players.length == 2) {
           setGameStarted(true)
         }
-        
 
         // for (let i = 0; i < players.length; i++) {
         //   if (players[i].playerAddress == address) {
@@ -94,14 +95,17 @@ function App() {
             <h2>Connected Players:</h2>
             <ul>
               {connectedPlayers.map((player) => (
-                <li key={player}>{player.name} : {player.playerAddress}</li>
+                <li key={player}>
+                  {player.name} : {player.playerAddress}
+                </li>
               ))}
             </ul>
           </div>
 
-
           {gameStarted === true ? (
-            <div>Partie démarrée</div>
+            <>
+              <Grid onSelectCell={(row, col) => console.log(row, col)} />
+            </>
           ) : (
             <div>En attente de joueurs ....</div>
           )}
