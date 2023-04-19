@@ -1,155 +1,116 @@
-import React, { useEffect, useState } from "react";
-import logo from "./logo.svg";
-// if you have successfuly compiled the smart contract in the backend folder, typechain should have created an interface that we can use here 
-// import {ExampleContract} from '../../backend/typechain/ExampleContract';
-import getContract from "./utils/useGetContract";
+import React, { useEffect, useState } from 'react'
+import logo from './logo.svg'
+import { Contract, ethers } from 'ethers'
+import BattleshipContract from '../../backend/artifacts/contracts/Battleship.sol/Battleship.json'
+import getContract from './utils/useGetContract'
 
 function App() {
-  const [contract, setContract] = useState();
-  const [ships, setShips] = useState([]);
+  const [contract, setContract] = useState() as any
+  const [name, setName] = useState('')
 
-  const [shipFormData, setShipFormData] = useState({
-    positionX: 0,
-    positionY: 0,
-    //isVertical: false,
-    size: 0,
-  })
+  const [address, setAddress] = useState('')
 
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const [connectedPlayers, setConnectedPlayers] = useState<string[]>([])
 
-  /*-----------SIDE EFFECTS---------------*/
-  useEffect(() => {
-    // wild wild west version of setting contract
-    setContract(getContract(contractAddress))
+  const [gameJoined, setGameJoined] = useState(false)
 
-  }, [])
+  const [gameStarted, setGameStarted] = useState(false)
 
-  useEffect(() => {
+  const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+
+  // /*-----------SIDE EFFECTS---------------*/
+  // useEffect(() => {
+  //   // wild wild west version of setting contract
+  //   setContract(getContract(contractAddress));
+  // }, [])
+
+  useEffect(()  => {
     if (contract) {
-      getAllShips()
-      contract.on("ShipAdded", async function () {
-        getAllShips();
-      });
-    };
-  }, [contract]);
+      contract.on('PlayerJoinded', async function () {
+        const players = await contract.getPlayers();
+        setConnectedPlayers(players);
+        console.log(players)
 
-  useEffect(() => {
-    if (ships.length > 0) {
-      generateGrid(ships);
-    }
-  }, [ships]);
+        if(players.length == 2){
+          setGameStarted(true)
+        }
+        
 
-
-
-  async function getAllShips() {
-    const shipsA = await contract.getShips();
-    const tempArray: any = [];
-    shipsA.forEach(ship => {
-      tempArray.push({
-        position: ship.position,
-        size: ship.size,
-        isVertical: ship.isVertical,
-        id: ship.id,
+        // for (let i = 0; i < players.length; i++) {
+        //   if (players[i].playerAddress == address) {
+        //     console.log(players[i].playerAddress)
+        //     setGameJoined(true)
+        //   }
+        //}
       })
-
-    });
-    setShips(tempArray);
-    console.log(shipsA);
+    }
+  }, [contract]) /*-----------FUNCTIONS---------------*/
+  const handleConnect = async () => {
+    const provider = new ethers.providers.Web3Provider((window as any).ethereum)
+    await provider.send('eth_requestAccounts', [])
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(
+      contractAddress,
+      BattleshipContract.abi,
+      signer
+    )
+    setContract(contract)
+    setAddress(await signer.getAddress())
   }
 
-  async function addShip() {
-    const posX = shipFormData.positionX;
-    const posY = shipFormData.positionY;
-    const size = shipFormData.size;
-    const isVertical = true;
-
-    const finalPosition = [posX, posY];
-
-    await contract.addShip(finalPosition, size, isVertical);
+  const handleJoinGame = async () => {
+    try {
+      await contract.joinGame(name)
+      console.log('Player joined the game')
+      setGameJoined(true)
+    } catch (err) {
+      console.error(err)
+      alert(err.reason) //affiche le message d'erreur 'Game is full'
+    }
   }
-
-  const handleChange = (event: any) => {
-    setShipFormData((prevState) => {
-      return {
-        ...prevState,
-        [event.target.name]: event.target.value,
-      };
-    })
-  }
-
-
-  // async function generateGrid(tableauxShips: any[]) {
-  //   const grid = document.querySelector(".grid-container");
-  //   const gridItems = document.querySelectorAll(".grid-item");
-  //   const ships = tableauxShips;
-
-  //   ships.forEach(ship => {
-  //     const position = ship.position;
-  //     const size = ship.size;
-  //     const isVertical = ship.isVertical;
-  //     const id = ship.id;
-
-  //     if (isVertical) {
-  //       for (let i = 0; i < size; i++) {
-  //         gridItems[position[0] + i + position[1] * 10].classList.add("ship");
-  //       }
-  //     } else {
-  //       for (let i = 0; i < size; i++) {
-  //         gridItems[position[0] + position[1] * 10 + i * 10].classList.add("ship");
-  //       }
-  //     }
-  //   })
-  // }
-
-  function generateGrid() {
-    const grid = document.querySelector(".grid-container");
-    const gridItems = document.querySelectorAll(".grid-item");
-
-    ships.forEach(ship => {
-      const position = ship.position;
-      const size = ship.size;
-      const isVertical = ship.isVertical;
-      const id = ship.id;
-
-      if (isVertical) {
-        for (let i = 0; i < size; i++) {
-          gridItems[position[0] + i + position[1] * 10].classList.add("ship");
-        }
-      } else {
-        for (let i = 0; i < size; i++) {
-          gridItems[position[0] + position[1] * 10 + i * 10].classList.add("ship");
-        }
-      }
-    })
-  }
-
-
 
   return (
     <>
-      <label>Position X : </label>
-      <input type="number" name="positionX" min={0} max={9} value={shipFormData.positionX} onChange={handleChange} />
-      <label>Position Y : </label>
-      <input type="number" name="positionY" min={0} max={9} value={shipFormData.positionY} onChange={handleChange} />
+      {address ? (
+        <>
+          <div>Connected Address: {address}</div>
 
-      <select name="size" value={shipFormData.size} onChange={handleChange}>|
-        <option value="0">Select size</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-      <button onClick={() => addShip()}>Add ship</button>
+          {gameJoined === true ? (
+            <div>Game Joined</div>
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                name="name"
+                id="name"
+                onChange={(e) => setName(e.target.value)}
+              />
+              <button onClick={handleJoinGame}>Join Game</button>
+            </>
+          )}
 
-      <br />
-      <br />
-      <div className="grid-container">
-        {Array.from({ length: 100 }).map((_, index) => (
-          <div key={index} className="grid-item" onClick={() => console.log(index)}></div>
-        ))}
-      </div>    </>
-  );
+          <div>
+            <h2>Connected Players:</h2>
+            <ul>
+              {connectedPlayers.map((player) => (
+                <li key={player}>{player.name} : {player.playerAddress}</li>
+              ))}
+            </ul>
+          </div>
+
+
+          {gameStarted === true ? (
+            <div>Partie démarrée</div>
+          ) : (
+            <div>En attente de joueurs ....</div>
+          )}
+        </>
+      ) : (
+        <button onClick={handleConnect}>Connect to Metamask</button>
+      )}
+    </>
+  )
 }
 
-export default App;
+export default App
