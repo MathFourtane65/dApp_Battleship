@@ -41,6 +41,8 @@ contract Battleship {
     event PlayerJoinded(address player, string name); //evenement de connexion d'un joueur à la partie
     event PlayerTurn(address player); //evenement de changement de joueur courant
 
+    event ShipPlaced(address player, uint8 x, uint8 y, uint8 length, bool horizontal); //evenement de placement d'un bateau
+
     // constructor() {
     //     currentPlayer = msg.sender;
     // }
@@ -88,7 +90,8 @@ contract Battleship {
         address otherPlayer = getOtherPlayer();
         currentPlayer = otherPlayer;
         emit PlayerTurn(currentPlayer);
-        
+
+        emit ShipPlaced(msg.sender, _x, _y, _length, _horizontal);        
 
     }
 
