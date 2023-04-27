@@ -88,6 +88,7 @@ contract Battleship {
         address otherPlayer = getOtherPlayer();
         currentPlayer = otherPlayer;
         emit PlayerTurn(currentPlayer);
+        
 
     }
 
