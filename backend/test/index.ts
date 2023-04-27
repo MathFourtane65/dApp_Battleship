@@ -121,19 +121,22 @@ describe("Battleship", function () {
       // Commencer la partie
       await battleship.startGame();
     
-      // Ajouter les bateaux pour le joueur 1
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
       await battleship.addShip(2, 0, 0, true);
-      await battleship.addShip(3, 1, 1, true);
-      await battleship.addShip(3, 2, 2, true);
-      await battleship.addShip(4, 3, 3, true);
-      await battleship.addShip(5, 4, 4, true);
-    
-      // Ajouter les bateaux pour le joueur 2
       await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
       await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
       await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
       await battleship.connect(player2).addShip(4, 8, 3, false);
+
+      await battleship.addShip(5, 4, 4, true);
       await battleship.connect(player2).addShip(5, 9, 4, false);
+
     
       // Vérifier que les bateaux ont été ajoutés correctement pour le joueur 1
       const ships1 = await battleship.getShips(player1.address);
@@ -155,7 +158,7 @@ describe("Battleship", function () {
       expect(ships2[4]._length).to.equal(5);
     });
 
-    it("Doit empecher un joueur de placer un bateau s'il y a déjà 5 bateaux", async function () {
+    it("Doit empecher un joueur de placer un bateau s'il a déjà 5 bateaux", async function () {
       // Ajouter les deux joueurs
       await battleship.joinGame("Alice");
       await battleship.connect(player2).joinGame("Bob");
@@ -163,25 +166,262 @@ describe("Battleship", function () {
       // Commencer la partie
       await battleship.startGame();
     
-      // Ajouter les bateaux pour le joueur 1
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
       await battleship.addShip(2, 0, 0, true);
-      await battleship.addShip(3, 1, 1, true);
-      await battleship.addShip(3, 2, 2, true);
-      await battleship.addShip(4, 3, 3, true);
-      await battleship.addShip(5, 4, 4, true);
-    
-      // Ajouter les bateaux pour le joueur 2
       await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
       await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
       await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
       await battleship.connect(player2).addShip(4, 8, 3, false);
+
+      await battleship.addShip(5, 4, 4, true);
       await battleship.connect(player2).addShip(5, 9, 4, false);
-    
+        
       // Ajouter un bateau pour le joueur 1
       await expect(battleship.addShip(5, 4, 4, true)).to.be.revertedWith(
         "Player has already placed 5 ships"
       );
     });
+
+    it("Doit empecher un joueur de placer un bateau deux fois sur des cellules qui se chevauchent", async function () {
+      // Ajouter les deux joueurs
+      await battleship.joinGame("Alice");
+      await battleship.connect(player2).joinGame("Bob");
+    
+      // Commencer la partie
+      await battleship.startGame();
+    
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
+      await battleship.addShip(2, 0, 0, true);
+      await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
+      await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
+      await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
+      await battleship.connect(player2).addShip(4, 8, 3, false);
+
+        
+      // Ajouter un bateau sur des cellules deja utilisees pour le joueur 1
+      await expect(battleship.addShip(5, 3, 3, true)).to.be.revertedWith(
+        "Player has already placed a ship on this cell"
+      );
+    });
+
+    it("Doit empecher un joueur de placer un bateau en dehors de la grille", async function () {
+      // Ajouter les deux joueurs
+      await battleship.joinGame("Alice");
+      await battleship.connect(player2).joinGame("Bob");
+    
+      // Commencer la partie
+      await battleship.startGame();
+    
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
+      await battleship.addShip(2, 0, 0, true);
+      await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
+      await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
+      await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
+      await battleship.connect(player2).addShip(4, 8, 3, false);
+        
+      // Ajouter un bateau en dehors de la grille pour le joueur 1
+      await expect(battleship.addShip(5, 5, 5, true)).to.be.revertedWith(
+        "Le bateau ou une partie est placee en dehors de la grille"
+      );
+    });
     
   });
+
+  describe("attack", function () {
+
+    it("Doit permettre a un joueur d'attaquer une cellule et voir qu'il a rate ('miss')", async function () {
+      // Ajouter les deux joueurs
+      await battleship.joinGame("Alice");
+      await battleship.connect(player2).joinGame("Bob");
+    
+      // Commencer la partie
+      await battleship.startGame();
+    
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
+      await battleship.addShip(2, 0, 0, true);
+      await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
+      await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
+      await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
+      await battleship.connect(player2).addShip(4, 8, 3, false);
+
+      await battleship.addShip(5, 4, 4, true);
+      await battleship.connect(player2).addShip(5, 9, 4, false);
+
+      await battleship.attack(4, 2); //miss
+
+      const missilesJoueur1 = await battleship.getMissiles(player1.address);
+
+      // await battleship.connect(player2).attack(2, 3); //miss
+      // await battleship.attack(6, 3); //hit
+      // await battleship.connect(player2).attack(1, 1); //hit
+
+
+      expect(missilesJoueur1[0].x).to.equal(4);
+      expect(missilesJoueur1[0].y).to.equal(2);
+      expect(missilesJoueur1[0].result).to.equal("miss");
+
+
+      //Attquer une cellule vide pour le joueur 2
+      // await battleship.connect(player2).attack(2, 3);
+
+      // expect(missilesJoueur2[0].x).to.equal(2);
+      // expect(missilesJoueur2[0].y).to.equal(3);
+      // expect(missilesJoueur2[0].result).to.equal("miss");
+
+
+
+
+      // const missilesJoueur2 = await battleship.getMissiles(player2.address);
+
+
+    });
+
+    it("Doit permettre a un joueur d'attaquer une cellule et voir qu'il a touche ('hit')", async function () {
+      // Ajouter les deux joueurs
+      await battleship.joinGame("Alice");
+      await battleship.connect(player2).joinGame("Bob");
+
+      // Commencer la partie
+      await battleship.startGame();
+
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
+      await battleship.addShip(2, 0, 0, true);
+      await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
+      await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
+      await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
+      await battleship.connect(player2).addShip(4, 8, 3, false);
+
+      await battleship.addShip(5, 4, 4, true);
+      await battleship.connect(player2).addShip(5, 9, 4, false);
+      await battleship.attack(6, 3); //hit
+
+      const missilesJoueur1 = await battleship.getMissiles(player1.address);
+
+      expect(missilesJoueur1[0].x).to.equal(6);
+      expect(missilesJoueur1[0].y).to.equal(3);
+      expect(missilesJoueur1[0].result).to.equal("hit");
+
+    });
+          
+
+
+    it("Doit empecher un joueur d'attaquer une cellule deja attaquee", async function () {
+      // Ajouter les deux joueurs
+      await battleship.joinGame("Alice");
+      await battleship.connect(player2).joinGame("Bob");
+    
+      // Commencer la partie
+      await battleship.startGame();
+    
+      // Ajouter les bateaux pour les joueurs l'un après l'autre
+      await battleship.addShip(2, 0, 0, true);
+      await battleship.connect(player2).addShip(2, 5, 0, false);
+
+      await battleship.addShip(3, 1, 1, true);
+      await battleship.connect(player2).addShip(3, 6, 1, false);
+
+      await battleship.addShip(3, 2, 2, true);
+      await battleship.connect(player2).addShip(3, 7, 2, false);
+
+      await battleship.addShip(4, 3, 3, true);
+      await battleship.connect(player2).addShip(4, 8, 3, false);
+
+      await battleship.addShip(5, 4, 4, true);
+      await battleship.connect(player2).addShip(5, 9, 4, false);
+
+      await battleship.attack(4, 2); //miss
+
+      const missilesJoueur1 = await battleship.getMissiles(player1.address);
+
+      await expect(battleship.attack(4, 2)).to.be.revertedWith(
+        "Player has already shot this cell"
+      );
+
+    });
+  });
+
+  describe("Player Turn", function () {
+
+    it("Doit empecher un joueur de placer un bateau si ce n'est pas son tour", async function () {
+          // Ajouter les deux joueurs
+          await battleship.joinGame("Alice");
+          await battleship.connect(player2).joinGame("Bob");
+        
+          // Commencer la partie
+          await battleship.startGame();
+
+          await battleship.addShip(2, 0, 0, true);
+          
+          // Le joueur 1 ne peut pas placer un bateau car ce n'est pas son tour
+          await expect(battleship.addShip(3, 1, 1, true)).to.be.revertedWith(
+            "Ce n'est pas votre tour"
+          );
+    });
+
+    it("Doit empecher un joueur d'attaquer si ce n'est pas son tour", async function () {
+          // Ajouter les deux joueurs
+          await battleship.joinGame("Alice");
+          await battleship.connect(player2).joinGame("Bob");
+        
+          // Commencer la partie
+          await battleship.startGame();
+
+          await battleship.addShip(2, 0, 0, true);
+          await battleship.connect(player2).addShip(2, 5, 0, false);
+
+          await battleship.addShip(3, 1, 1, true);
+          await battleship.connect(player2).addShip(3, 6, 1, false);
+
+          await battleship.addShip(3, 2, 2, true);
+          await battleship.connect(player2).addShip(3, 7, 2, false);
+
+          await battleship.addShip(4, 3, 3, true);
+          await battleship.connect(player2).addShip(4, 8, 3, false);
+
+          await battleship.addShip(5, 4, 4, true);
+          await battleship.connect(player2).addShip(5, 9, 4, false);
+
+
+          // Le joueur 2 ne peut pas attaquer car ce n'est pas son tour
+          await expect(battleship.connect(player2).attack(6, 4)).to.be.revertedWith(
+            "Ce n'est pas votre tour"
+          );
+    });
+
+  });
+    
+
+      
+
+      
 });

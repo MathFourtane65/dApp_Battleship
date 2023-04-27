@@ -1,36 +1,36 @@
-![GitHub Banner](https://user-images.githubusercontent.com/40567147/159485872-7f63766a-3c91-48dc-aa37-fb5894232acc.png)
 
-This starter template comes as a monorepo for your next fullstack dApp Development. This will be your tools:
-:pager: React + Vite + Typescript
- :page_with_curl: Solidity + Hardhat + Typescript
+# dApp Battleship
 
-Typescript is integrated in the frontend as well in the smart contract part. This gives you a HUGE advantage, why? Because you can use types from the smart contract in your frontend part ( with the help of typechain https://github.com/dethcrypto/TypeChain). 
+### Jeu de la bataille navale 
+
+#### J'ai utilisé le "Template Starter" issu de ce repository : https://github.com/XamHans/React-Solidity-Typescript-Starter
+
+FrontEnd : React + Vite + Typescript
+
+BackEnd : Solidity + Hardhat + Typescript
 
 
-## How to start
 
-### Backend
-pre: cd into /backend
 
-0) start local testnet ---> npm run testnet
-1) Compile contracts ---> npm run build
-2) Test contracts -->     npm run test
-3) Deploy contracts -->   npm run deploy
 
-### Frontend
-pre: cd into /frontend
 
-1) Install dependencies ---> npm install
-2) start frontend ---> npm run dev
-3) build --> npm run build
+## Grille d'évaluation
 
-Here are some ready to use IPFS services 📡, that you can easily use for your next project 🚀
+ - le smart-contract compile correctement avec "npx hardhat compile" **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+ - le smart-contract est testé par la commande "npx hardhat test" (min 5 tests significatifs) **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+ - le test du smart-contract permet de tester le déploiement du contrat (deux joueurs obligatoires) **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+ - le test du smart-contract permet de tester l'ajout correct d'un bateau sur sa grille **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+- le test du smart-contract permet de tester l'ajout incorrect d'un bateau sur sa grille **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+- le test du smart-contract permet de tester une tentative correcte sur la grille de l'adversaire **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+- le test du smart-contract permet de tester une tentative incorrecte sur la grille de l'adversaire **1pt** [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+- le test du smart-contract permet de tester une tentative correcte mais par le mauvais joueur sur la grille de l'adversaire **1pt** (gestion des tours) [![Generic badge](https://img.shields.io/badge/-FAIT-<GREEN>.svg)](https://shields.io/)
+- le test du smart-contract permet de tester si la partie est terminée **1pt**
+- le test du smart-contract permet de tester qui est vainqueur. **1pt**
+- l'appli react permet de démarrer une partie (on saisit à la main l'adresse de l'adversaire) **2pts** [![Generic badge](https://img.shields.io/badge/-EN_COURS-orange.svg)](https://shields.io/)
+- l'appli react permet de jouer la partie **3pts** [![Generic badge](https://img.shields.io/badge/-EN_COURS-orange.svg)](https://shields.io/)
 
-🔗 https://pinata.cloud  
-🔗 https://nft.storage 
-🔗 https://docs.moralis.io/moralis-dapp/files/ipfs
-🔗 https://infura.io/product/ipfs 
+### Bonus : 
+- le test du smart-contract permet de tester l'envoi d'un hash de la position des bateaux en début de partie **2pts**
+- le test du smart-contract permet de tester la confirmation d'une tentative de l'adversaire **2pts**
+- le test du smart-contract permet de tester l'envoi de la position des bateaux en fin de partie **2pts**
 
-🌞 GM TO ALL OF YOU AND KEEP LEARNING WEB 3 -Johannes (https://twitter.com/XamHans)
-
-PS: If you are looking for a Web3 Job checkout my newest project :green_heart: : https://www.newdevsontheblock.com/ 
